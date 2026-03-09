@@ -5,7 +5,14 @@ const VALID_CURRENCIES = ['aud', 'usd', 'eur', 'gbp'] as const;
 type Currency = (typeof VALID_CURRENCIES)[number];
 
 // Fields stripped from every API response (internal scraper metadata)
-const STRIP_PROJECTION = { _id: 0, execution_environment: 0, data_completeness: 0 };
+const STRIP_PROJECTION = {
+  _id: 0,
+  source: 0,
+  execution_environment: 0,
+  data_completeness: 0,
+  bank_summary: 0,
+  market_statistics: 0,
+};
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -48,6 +55,34 @@ function getCollection(client: Awaited<ReturnType<typeof getMongoClient>>, dbNam
   return client.db(dbName).collection(`daily_${currency}_rates`);
 }
 
+// Strip `source` from every bank entry inside bank_rates (dynamic keys, can't use projection)
+function sanitizeDoc<T extends Record<string, unknown>>(doc: T): T {
+  if (doc.bank_rates && typeof doc.bank_rates === 'object') {
+    const cleaned: Record<string, unknown> = {};
+    for (const [bank, data] of Object.entries(doc.bank_rates as Record<string, unknown>)) {
+      if (data && typeof data === 'object') {
+        const { source: _s, ...rest } = data as Record<string, unknown>;
+        cleaned[bank] = rest;
+      } else {
+        cleaned[bank] = data;
+      }
+    }
+    return { ...doc, bank_rates: cleaned };
+  }
+  return doc;
+}
+
+// Filter bank_rates to only the requested banks (case-insensitive) and update total_banks
+function filterBanks(doc: Record<string, unknown>, banks: string[]): Record<string, unknown> {
+  if (!banks.length || !doc.bank_rates || typeof doc.bank_rates !== 'object') return doc;
+  const lower = banks.map(b => b.toLowerCase());
+  const filtered: Record<string, unknown> = {};
+  for (const [bank, data] of Object.entries(doc.bank_rates as Record<string, unknown>)) {
+    if (lower.includes(bank.toLowerCase())) filtered[bank] = data;
+  }
+  return { ...doc, bank_rates: filtered, total_banks: Object.keys(filtered).length };
+}
+
 // ─── GET /v1/rates  (all currencies, latest) ────────────────────────────────
 
 export async function handleGetAllLatest(env: Env): Promise<Response> {
@@ -63,7 +98,7 @@ export async function handleGetAllLatest(env: Env): Promise<Response> {
         if (!doc) {
           doc = await col.findOne({}, { sort: { date: -1 }, projection: STRIP_PROJECTION });
         }
-        return [currency, doc] as const;
+        return [currency, doc ? sanitizeDoc(doc as Record<string, unknown>) : doc] as const;
       }),
     );
 
@@ -96,7 +131,7 @@ export async function handleGetLatest(currency: string, env: Env): Promise<Respo
       return notFound(`No data found for ${currency.toUpperCase()}.`);
     }
 
-    return json({ success: true, currency: currency.toUpperCase(), data: doc });
+    return json({ success: true, currency: currency.toUpperCase(), data: sanitizeDoc(doc as Record<string, unknown>) });
   } catch (err) {
     return serverError(err);
   }
@@ -123,13 +158,13 @@ export async function handleGetByDate(currency: string, date: string, env: Env):
       return notFound(`No data found for ${currency.toUpperCase()} on ${date}.`);
     }
 
-    return json({ success: true, currency: currency.toUpperCase(), date, data: doc });
+    return json({ success: true, currency: currency.toUpperCase(), date, data: sanitizeDoc(doc as Record<string, unknown>) });
   } catch (err) {
     return serverError(err);
   }
 }
 
-// ─── GET /v1/rates/:currency/history?from=&to=&limit= ───────────────────────
+// ─── GET /v1/rates/:currency/history?from=&to=&limit=&banks= ───────────────
 
 export async function handleGetHistory(currency: string, url: URL, env: Env): Promise<Response> {
   if (!isValidCurrency(currency)) {
@@ -139,7 +174,9 @@ export async function handleGetHistory(currency: string, url: URL, env: Env): Pr
   const from = url.searchParams.get('from');
   const to = url.searchParams.get('to');
   const limitParam = url.searchParams.get('limit');
-  const limit = Math.min(Math.max(parseInt(limitParam ?? '30', 10) || 30, 1), 365);
+  const limit = Math.max(parseInt(limitParam ?? '30', 10) || 30, 1);
+  const banksParam = url.searchParams.get('banks');
+  const banks: string[] = banksParam ? banksParam.split(',').map(b => b.trim()).filter(Boolean) : [];
 
   if (from && !isValidDate(from)) {
     return badRequest('Invalid "from" date. Use YYYY-MM-DD.');
@@ -160,17 +197,23 @@ export async function handleGetHistory(currency: string, url: URL, env: Env): Pr
     const client = await getMongoClient(env.MONGODB_URI);
     const col = getCollection(client, env.DB_NAME, currency);
 
-    const docs = await col
+    const docs = (await col
       .find(filter, { projection: STRIP_PROJECTION })
       .sort({ date: -1 })
       .limit(limit)
-      .toArray();
+      .toArray())
+      .map(doc => filterBanks(sanitizeDoc(doc as Record<string, unknown>), banks));
 
     return json({
       success: true,
       currency: currency.toUpperCase(),
       count: docs.length,
-      filters: { from: from ?? null, to: to ?? null, limit },
+      filters: {
+        from: from ?? null,
+        to: to ?? null,
+        limit,
+        banks: banks.length ? banks : null,
+      },
       data: docs,
     });
   } catch (err) {

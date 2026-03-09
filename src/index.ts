@@ -53,8 +53,8 @@ export default {
         return handleGetHistory(historyMatch[1], url, env);
       }
 
-      // GET /v1/rates/:currency/date/:date
-      const dateMatch = pathname.match(/^\/v1\/rates\/([a-z]+)\/date\/(\d{4}-\d{2}-\d{2})$/);
+      // GET /v1/rates/:currency/date/:date  (handler validates date format → 400)
+      const dateMatch = pathname.match(/^\/v1\/rates\/([a-z]+)\/date\/(.+)$/);
       if (dateMatch) {
         return handleGetByDate(dateMatch[1], dateMatch[2], env);
       }

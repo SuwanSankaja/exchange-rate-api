@@ -9,7 +9,9 @@
     "kv:create": "wrangler kv namespace create API_KEYS",
     "key:add": "node scripts/add-api-key.mjs",
     "key:list": "node scripts/list-api-keys.mjs",
-    "key:revoke": "node scripts/revoke-api-key.mjs"
+    "key:revoke": "node scripts/revoke-api-key.mjs",
+    "test": "node scripts/test-api.mjs",
+    "test:local": "node scripts/test-api.mjs --local"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
