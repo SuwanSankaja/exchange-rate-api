@@ -1,0 +1,23 @@
+name = "exchange-rate-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+DB_NAME = "exchange_rates"
+
+# ─── KV Namespace for API Keys ───────────────────────────────────────────────
+# First time setup:
+#   1. Run:  npm run kv:create
+#   2. Copy the output `id` values below
+# ─────────────────────────────────────────────────────────────────────────────
+[[kv_namespaces]]
+binding = "API_KEYS"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+preview_id = "REPLACE_WITH_YOUR_KV_PREVIEW_NAMESPACE_ID"
+
+# ─── MongoDB URI ──────────────────────────────────────────────────────────────
+# Store as a secret (not in this file):
+#   wrangler secret put MONGODB_URI
+# For local dev, set it in .dev.vars
+# ─────────────────────────────────────────────────────────────────────────────
