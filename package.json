@@ -6,7 +6,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "type-check": "tsc --noEmit",
-    "kv:create": "wrangler kv:namespace create API_KEYS",
+    "kv:create": "wrangler kv namespace create API_KEYS",
     "key:add": "node scripts/add-api-key.mjs",
     "key:list": "node scripts/list-api-keys.mjs",
     "key:revoke": "node scripts/revoke-api-key.mjs"
@@ -14,7 +14,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241127.0",
     "typescript": "^5.5.0",
-    "wrangler": "^3.80.0"
+    "wrangler": "^4.71.0"
   },
   "dependencies": {
     "mongodb": "^6.10.0"

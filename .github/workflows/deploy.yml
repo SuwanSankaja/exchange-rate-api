@@ -30,5 +30,6 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          wranglerVersion: '4.71.0'
           # MONGODB_URI is already stored as a Cloudflare secret via `wrangler secret put`
           # No secrets need to be passed here — they live in Cloudflare directly

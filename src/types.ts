@@ -13,6 +13,7 @@ export interface ApiKeyData {
   name: string;
   created: string;
   active: boolean;
+  daily_limit?: number; // max requests per day, undefined = unlimited
   revoked?: string;
 }
 

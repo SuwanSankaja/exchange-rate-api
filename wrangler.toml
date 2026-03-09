@@ -13,8 +13,8 @@ DB_NAME = "exchange_rates"
 # ─────────────────────────────────────────────────────────────────────────────
 [[kv_namespaces]]
 binding = "API_KEYS"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
-preview_id = "REPLACE_WITH_YOUR_KV_PREVIEW_NAMESPACE_ID"
+id = "a3dc775177da437a8e76c26949b1639c"
+preview_id = "4029036b72644199b520e4081d1bb818"
 
 # ─── MongoDB URI ──────────────────────────────────────────────────────────────
 # Store as a secret (not in this file):

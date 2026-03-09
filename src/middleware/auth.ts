@@ -4,6 +4,7 @@ import type { Env, ApiKeyData } from '../types';
 
 /**
  * Validates the `X-API-Key` header against entries stored in Cloudflare KV.
+ * Also enforces per-key daily rate limits when configured.
  * Returns a Response on failure, or null if auth passed.
  */
 export async function authenticate(request: Request, env: Env): Promise<Response | null> {
@@ -29,12 +30,60 @@ export async function authenticate(request: Request, env: Env): Promise<Response
     return jsonError('API key has been revoked.', 403);
   }
 
+  // ── Rate limiting ────────────────────────────────────────────────────────
+  if (keyData.daily_limit !== undefined && keyData.daily_limit > 0) {
+    const today = new Date().toISOString().split('T')[0];
+    const counterKey = `rl:${apiKey}:${today}`;
+
+    const raw = await env.API_KEYS.get(counterKey);
+    const count = raw ? parseInt(raw, 10) : 0;
+
+    if (count >= keyData.daily_limit) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: `Daily request limit of ${keyData.daily_limit.toLocaleString()} reached. Resets at midnight UTC.`,
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-RateLimit-Limit': String(keyData.daily_limit),
+            'X-RateLimit-Remaining': '0',
+            'X-RateLimit-Reset': nextMidnightUTC(),
+          },
+        },
+      );
+    }
+
+    // Increment counter — TTL ensures it auto-expires at end of day
+    const secondsUntilMidnight = getSecondsUntilMidnightUTC();
+    await env.API_KEYS.put(counterKey, String(count + 1), {
+      expirationTtl: secondsUntilMidnight,
+    });
+  }
+
   return null; // Auth passed
 }
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function jsonError(message: string, status: number): Response {
   return new Response(JSON.stringify({ success: false, error: message }), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+function getSecondsUntilMidnightUTC(): number {
+  const now = new Date();
+  const midnight = new Date();
+  midnight.setUTCHours(24, 0, 0, 0);
+  return Math.max(60, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+}
+
+function nextMidnightUTC(): string {
+  const midnight = new Date();
+  midnight.setUTCHours(24, 0, 0, 0);
+  return String(Math.floor(midnight.getTime() / 1000));
 }

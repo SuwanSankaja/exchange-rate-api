@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 
 try {
-  const raw = execSync('wrangler kv:key list --binding=API_KEYS', { encoding: 'utf8' });
+  const raw = execSync('npx wrangler kv key list --binding=API_KEYS --remote --preview false', { encoding: 'utf8' });
   const keys = JSON.parse(raw);
 
   if (!keys.length) {
@@ -22,7 +22,7 @@ try {
 
   for (const { name: keyName } of keys) {
     try {
-      const val = execSync(`wrangler kv:key get --binding=API_KEYS "${keyName}"`, {
+      const val = execSync(`npx wrangler kv key get --binding=API_KEYS --remote --preview false "${keyName}"`, {
         encoding: 'utf8',
       });
       const data = JSON.parse(val);

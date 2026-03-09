@@ -24,11 +24,11 @@ if (!key) {
 
 try {
   if (hardDelete) {
-    execSync(`wrangler kv:key delete --binding=API_KEYS "${key}"`, { stdio: 'inherit' });
+    execSync(`npx wrangler kv key delete --binding=API_KEYS --remote --preview false "${key}"`, { stdio: 'inherit' });
     console.log(`\nKey ${key} permanently deleted from KV.\n`);
   } else {
     // Soft revoke — fetch current data, flip active to false
-    const raw = execSync(`wrangler kv:key get --binding=API_KEYS "${key}"`, { encoding: 'utf8' });
+    const raw = execSync(`npx wrangler kv key get --binding=API_KEYS --remote --preview false "${key}"`, { encoding: 'utf8' });
     const data = JSON.parse(raw);
 
     if (!data.active) {
@@ -40,7 +40,7 @@ try {
     data.revoked = new Date().toISOString().split('T')[0];
 
     execSync(
-      `wrangler kv:key put --binding=API_KEYS "${key}" '${JSON.stringify(data)}'`,
+      `npx wrangler kv key put --binding=API_KEYS --remote --preview false "${key}" '${JSON.stringify(data)}'`,
       { stdio: 'inherit' },
     );
 
