@@ -1,5 +1,3 @@
-<![CDATA[<div align="center">
-
 # 💱 Exchange Rate API
 
 ### Real-time Sri Lankan bank exchange rates — powered by Cloudflare Workers & MongoDB Atlas
@@ -9,40 +7,22 @@
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/atlas)
 [![License](https://img.shields.io/badge/License-MIT-A855F7?style=for-the-badge)](LICENSE)
 
-<br />
-
-<p align="center">
-  <strong>A blazing-fast, edge-deployed REST API</strong> that serves daily exchange rate data for <b>USD</b>, <b>EUR</b>, <b>GBP</b>, and <b>AUD</b> against the <b>Sri Lankan Rupee (LKR)</b>, aggregated from multiple commercial banks.
-</p>
-
-<br />
-
-[Getting Started](#-getting-started) •
-[API Reference](#-api-reference) •
-[Authentication](#-authentication) •
-[Scripts](#-management-scripts) •
-[Deployment](#-deployment)
+> A blazing-fast, edge-deployed REST API that serves daily exchange rate data for **USD**, **EUR**, **GBP**, and **AUD** against the **Sri Lankan Rupee (LKR)**, aggregated from multiple commercial banks.
 
 ---
 
-</div>
-
-<br />
-
 ## ✨ Features
 
-| Feature | Description |
-|---------|------------|
-| 🌍 **Edge-First** | Deployed on Cloudflare Workers — sub-50ms latency globally |
-| 🏦 **Multi-Bank Data** | Buying & selling rates from Sri Lankan commercial banks |
-| 📅 **Historical Lookups** | Query exchange rates for any past date |
-| 📈 **Time-Series History** | Fetch rate history with date range & bank filters |
-| 🔐 **API Key Auth** | Secure access via `X-API-Key` header with KV-backed validation |
-| ⚡ **Rate Limiting** | Per-key daily limits with probabilistic counters (KV-friendly) |
-| 🔄 **CORS Enabled** | Ready for browser & frontend integrations out of the box |
-| 🚀 **CI/CD** | Auto-deploy on push to `main` via GitHub Actions |
+- 🌍 **Edge-First** — Deployed on Cloudflare Workers with sub-50ms latency globally
+- 🏦 **Multi-Bank Data** — Buying & selling rates from Sri Lankan commercial banks
+- 📅 **Historical Lookups** — Query exchange rates for any past date
+- 📈 **Time-Series History** — Fetch rate history with date range & bank filters
+- 🔐 **API Key Auth** — Secure access via `X-API-Key` header with KV-backed validation
+- ⚡ **Rate Limiting** — Per-key daily limits with probabilistic counters (KV-friendly)
+- 🔄 **CORS Enabled** — Ready for browser & frontend integrations out of the box
+- 🚀 **CI/CD** — Auto-deploy on push to `main` via GitHub Actions
 
-<br />
+---
 
 ## 🏛️ Architecture
 
@@ -63,7 +43,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-<br />
+---
 
 ## 📂 Project Structure
 
@@ -92,7 +72,7 @@ exchange-rate-api/
 └── package.json
 ```
 
-<br />
+---
 
 ## 🚀 Getting Started
 
@@ -157,7 +137,7 @@ npm run dev
 npm run type-check
 ```
 
-<br />
+---
 
 ## 🔐 Authentication
 
@@ -186,17 +166,17 @@ X-RateLimit-Remaining: 0
 X-RateLimit-Reset: 1714003200
 ```
 
-<br />
+---
 
 ## 📖 API Reference
 
-**Base URL**
+**Base URL:**
 
 ```
 https://exchange-rate-api.suwan-sankaja.workers.dev
 ```
 
-### Supported Currencies
+### 🌐 Supported Currencies
 
 | Code | Currency |
 |------|----------|
@@ -358,7 +338,7 @@ curl -H "X-API-Key: $API_KEY" \
 
 # Specific date range, filtered to 2 banks
 curl -H "X-API-Key: $API_KEY" \
-  "https://exchange-rate-api.suwan-sankaja.workers.dev/v1/rates/usd/history?from=2026-01-01&to=2026-03-31&banks=Sampath Bank,Commercial Bank"
+  "https://exchange-rate-api.suwan-sankaja.workers.dev/v1/rates/usd/history?from=2026-01-01&to=2026-03-31&banks=Sampath+Bank,Commercial+Bank"
 ```
 
 <details>
@@ -394,7 +374,7 @@ curl -H "X-API-Key: $API_KEY" \
 
 </details>
 
-<br />
+---
 
 ## ❌ Error Responses
 
@@ -417,7 +397,7 @@ All errors follow a consistent format:
 | `429` | Daily rate limit exceeded |
 | `500` | Internal server error |
 
-<br />
+---
 
 ## 🛠️ Management Scripts
 
@@ -461,7 +441,7 @@ npm test -- --key=key_your_key_here
 
 > **Note:** Create a `.env` file with `TEST_API_KEY` and optionally `API_BASE_URL` to skip passing flags manually.
 
-<br />
+---
 
 ## 🚀 Deployment
 
@@ -488,7 +468,7 @@ Every push to `main` triggers the GitHub Actions workflow:
 npm run deploy
 ```
 
-<br />
+---
 
 ## 🗄️ Database Schema
 
@@ -520,7 +500,7 @@ Each document structure:
 }
 ```
 
-<br />
+---
 
 ## 🧰 Tech Stack
 
@@ -533,21 +513,12 @@ Each document structure:
 | [Wrangler](https://developers.cloudflare.com/workers/wrangler/) | Build, dev & deploy toolchain |
 | [GitHub Actions](https://github.com/features/actions) | CI/CD pipeline |
 
-<br />
+---
 
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
 
-<br />
-
 ---
 
-<div align="center">
-
 **Built with ❤️ on the edge**
-
-[⬆ Back to Top](#-exchange-rate-api)
-
-</div>
-]]>
